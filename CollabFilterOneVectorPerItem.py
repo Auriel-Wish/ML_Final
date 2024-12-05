@@ -118,16 +118,13 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
         yhat_N = self.predict(user_id_N, item_id_N, mu, b_per_user, c_per_item, U, V)
 
         # Compute the mean squared error loss
-        mae_loss = ag_np.mean(ag_np.abs(y_N - yhat_N))
+        mse_loss = ag_np.mean((y_N - yhat_N) ** 2)
 
         # Compute the regularization term
-        reg_loss = self.alpha * (
-            ag_np.sum(U ** 2) +
-            ag_np.sum(V ** 2)
-        )
+        reg_loss = self.alpha * (ag_np.sum(U ** 2) + ag_np.sum(V ** 2))
 
-        # Total loss is the sum of mae loss and regularization loss
-        loss_total = mae_loss + reg_loss
+        # Total loss is the sum of mse loss and regularization loss
+        loss_total = mse_loss + reg_loss
         return loss_total
 
 
