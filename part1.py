@@ -1,7 +1,6 @@
-# from CollabFilterOneVectorPerItem import CollabFilterOneVectorPerItem
-# from train_valid_test_loader import load_train_valid_test_datasets
 from CollabFilterOneVectorPerItem import *
 from train_valid_test_loader import *
+import pickle
 
 # Load dataset
 train_tuple, valid_tuple, test_tuple, n_users, n_items = load_train_valid_test_datasets()
@@ -27,40 +26,49 @@ def train_and_evaluate(k, alpha, n_epochs=10, step_size=0.1):
 results_no_reg = {}
 for k in [2, 10, 50]:
     print(f"Training with K={k}, alpha=0.0")
-    params, valid_perf, test_perf = train_and_evaluate(k=k, alpha=0.0, n_epochs=20, step_size=0.05)
+    params, valid_perf, test_perf = train_and_evaluate(k=k, alpha=0.0, n_epochs=100, step_size=50)
     results_no_reg[k] = {
         "params": params,
         "valid_perf": valid_perf,
         "test_perf": test_perf,
     }
 
-# # Second phase: Train with moderate regularization for K=50
-# print("Training with K=50, moderate regularization (alpha=0.1)")
-# params_reg, valid_perf_reg, test_perf_reg = train_and_evaluate(k=50, alpha=0.1, n_epochs=30, step_size=0.05)
+# Second phase: Train with moderate regularization for K=50
+print("Training with K=50, moderate regularization (alpha=0.1)")
+params_reg, valid_perf_reg, test_perf_reg = train_and_evaluate(k=50, alpha=0.1, n_epochs=100, step_size=50)
 
-# # Save the results for both phases
-# results_with_reg = {
-#     "params": params_reg,
-#     "valid_perf": valid_perf_reg,
-#     "test_perf": test_perf_reg,
-# }
+# Save the results for both phases
+results_with_reg = {
+    "params": params_reg,
+    "valid_perf": valid_perf_reg,
+    "test_perf": test_perf_reg,
+}
 
-# # Prepare results for display
-# rows = []
-# for k, res in results_no_reg.items():
-#     rows.append({
-#         "K": k,
-#         "Alpha": 0.0,
-#         "Validation MAE": res["valid_perf"]["mae"],
-#         "Test MAE": res["test_perf"]["mae"],
-#     })
+# Prepare results for display
+rows = []
+for k, res in results_no_reg.items():
+    rows.append({
+        "K": k,
+        "Alpha": 0.0,
+        "Validation MAE": res["valid_perf"]["mae"],
+        "Test MAE": res["test_perf"]["mae"],
+    })
 
-# rows.append({
-#     "K": 50,
-#     "Alpha": 0.1,
-#     "Validation MAE": results_with_reg["valid_perf"]["mae"],
-#     "Test MAE": results_with_reg["test_perf"]["mae"],
-# })
+rows.append({
+    "K": 50,
+    "Alpha": 0.1,
+    "Validation MAE": results_with_reg["valid_perf"]["mae"],
+    "Test MAE": results_with_reg["test_perf"]["mae"],
+})
 
-# results_df = pd.DataFrame(rows)
-# print(results_df)
+results_df = pd.DataFrame(rows)
+print(results_df)
+
+# Save the parameters of the best model for each alpha to a file
+best_k = min(results_no_reg, key=lambda k: results_no_reg[k]["valid_perf"]["mae"])
+
+with open('best_model_no_reg.pkl', 'wb') as f:
+    pickle.dump(results_no_reg[best_k]["params"], f)
+
+with open('best_model_with_reg.pkl', 'wb') as f:
+    pickle.dump(results_with_reg["params"], f)

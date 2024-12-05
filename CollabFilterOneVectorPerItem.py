@@ -55,8 +55,10 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
             mu=ag_np.zeros(1),
             b_per_user=ag_np.zeros(n_users),
             c_per_item=ag_np.zeros(n_items),
-            U=0.001 * random_state.randn(n_users, self.n_factors),
-            V=0.001 * random_state.randn(n_items, self.n_factors),
+            U=0.01 * random_state.randn(n_users, self.n_factors),
+            V=0.01 * random_state.randn(n_items, self.n_factors),
+            # U=0.001 * random_state.randn(n_users, self.n_factors),
+            # V=0.001 * random_state.randn(n_items, self.n_factors),
             )
 
 
